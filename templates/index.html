@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeGPT</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="dark-mode">
+
+  <header>
+    <h1>Hello, <span class="username">User</span></h1>
+  </header>
+
+  <main id="response-list"></main>
+
+  <footer>
+    <form id="chat-form">
+      <input type="text" id="user-input" placeholder="Ask Sourav" required>
+      <button type="submit">Send</button>
+    </form>
+    <div class="spinner hidden" id="spinner"></div>
+  </footer>
+
+  <script>
+    const form = document.getElementById("chat-form");
+    const input = document.getElementById("user-input");
+    const responseList = document.getElementById("response-list");
+    const spinner = document.getElementById("spinner");
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const userMsg = input.value;
+      input.value = "";
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "response-item";
+      wrapper.innerHTML = `<div class='user-message'>${userMsg}</div>`;
+      responseList.appendChild(wrapper);
+      responseList.scrollTop = responseList.scrollHeight;
+
+      spinner.classList.remove("hidden");
+
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userMsg })
+      });
+
+      const data = await res.json();
+      const bot = document.createElement("div");
+      bot.className = "bot-message";
+      bot.innerHTML = data.response;
+      wrapper.appendChild(bot);
+
+      spinner.classList.add("hidden");
+      responseList.scrollTop = responseList.scrollHeight;
+    };
+  </script>
+</body>
+</html>
